@@ -5,10 +5,10 @@
 #include "Declarations.h"
 #include "EnumsAndStructs.h"
 
-//constant data
+//Static, Part of the Hub
 constexpr float WEB_HEIGHT{ 550 };
-constexpr int BALL_RADIUS{ 48 };
-constexpr int CHESTS_PER_ROW{ 12 };
+
+//booleans
 boolean isColliding{ false };
 boolean dropCoin{ false };
 
@@ -22,7 +22,6 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE)
 // Called by PlayBuffer every frame (60 times a second!)
 bool MainGameUpdate(float elapsedTime)
 {
-
 	//Current Game State Switch
 	switch (currentLevelState)
 	{
@@ -44,7 +43,7 @@ bool MainGameUpdate(float elapsedTime)
 	}
 
 	Draw();
-
+	//Quit if needed
 	return Play::KeyDown(VK_ESCAPE);
 }
 
@@ -57,23 +56,22 @@ int MainGameExit(void)
 
 void Draw()
 {
-	// Clear our screen white so we don't keep pixel data from the previous frame.
+	//Clear Previos frame and draw background
 	Play::ClearDrawingBuffer(Play::cWhite);
 	Play::DrawBackground();
 
-
-	//Start Game Text
-	if (currentLevelState == levelState::STATE_START)
+	//Combined to minimise code
+	//On start and on play, draw the objects and the hud
+	if (currentLevelState == levelState::STATE_START || currentLevelState == levelState::STATE_PLAY)
 	{
 		DrawObjects();
 		CreateHud();
-		Play::DrawFontText("64px", "Hit Space to Start", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
 	}
 
-	if (currentLevelState == levelState::STATE_PLAY)
+	//Draw additional start game text
+	if (currentLevelState == levelState::STATE_START)
 	{
-		DrawObjects();
-		CreateHud();
+		Play::DrawFontText("64px", "Hit Space to Start", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
 	}
 
 	//Draw Pause Text
@@ -83,6 +81,7 @@ void Draw()
 		Play::DrawFontText("64px", "Hit Space to Resume", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
 	}
 
+	//If Ball Out of Bounds
 	if (currentLevelState == levelState::STATE_GAMEOVER)
 	{
 		Play::DrawFontText("64px", "Game Over!", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
@@ -94,28 +93,39 @@ void Draw()
 	Play::PresentDrawingBuffer();
 }
 
+
 void DrawObjects() {
 	//Drawing Web 
 	Play::DrawLine({ DISPLAY_START, WEB_HEIGHT }, { DISPLAY_WIDTH, WEB_HEIGHT }, Play::cWhite);
 
-	//Iterating and drawing all the chests
+	//Fetching all the chests and assigning them to ID's
 	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
 
+	//Iterate over every chest ID
+	//Get the chest ID and draw the chest
 	for (int i : chestIds)
 	{
 		GameObject& chest = Play::GetGameObject(i);
 		Play::DrawObject(chest);
+
+		//Rectangle for testing collision
 		Play::DrawRect(chest.pos - chestObj.CHEST_AABB, chest.pos + chestObj.CHEST_AABB, Play::cWhite);
 	}
+
+	//Fetching all the coins and assigning them to ID's
 	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
+
+	//Iterate over every coin ID
 	for (int j : coinIds)
 	{
 		GameObject& coin = Play::GetGameObject(j);
 		Play::DrawObject(coin);
-		//Play::DrawRect(chest.pos - chestObj.CHEST_AABB, chest.pos + chestObj.CHEST_AABB, Play::cWhite);
+
+		//Rectanggle for testing collision
+		//Play::DrawRect(coin.pos - coinObj.COIN_AABB, coin.pos + coinObj.COIN_AABB, Play::cWhite);
 	}
 
-	//Drawing GameObjects
+	//Drawing Objects that only have one instance
 	Play::DrawObject(Play::GetGameObjectByType(TYPE_AGENT));
 	Play::DrawObject(Play::GetGameObjectByType(TYPE_BALL));
 
@@ -126,19 +136,29 @@ void DrawObjects() {
 	//AABB Box for the ball
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
 	Play::DrawRect(ball.pos - ballObj.BALL_AABB, ball.pos + ballObj.BALL_AABB, Play::cWhite);
-
 }
 
-
+//Called in the inital creation
+//Draw all chests across the top of the screen
 void CreateChests()
 {
 	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
 	std::vector<int> coinIds = Play::CollectGameObjectIDsByType(TYPE_COIN);
 
+	//While there is less than 24, draw a chest and a coin 
+	//Coin is currently drawn onto for testing but eventually will need to be swapped so is hidden.
 	for (int i = 1; i <= 24; i++) {
 		Play::CreateGameObject(TYPE_CHEST, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, 10, "box");
 		Play::CreateGameObject(TYPE_COIN, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, coinObj.COIN_RADIUS, "coin");
+		
+		//Add the width and spacing, so next chest is drawn next to previous
 		chestObj.chestSpacing += 105;
+
+		//Could replace with a for loop? 
+		//More efficent
+
+		//If there is no remainder then the max amount of chests for that row has been reached
+		//Start a new line 
 		if (i % CHESTS_PER_ROW == 0 && !(i == 0)) {
 			chestObj.chestHeight += 110;
 			chestObj.chestSpacing = chestObj.CHEST_START_X;
@@ -146,6 +166,7 @@ void CreateChests()
 	}
 }
 
+//All objects that are drawn at the start of the game
 void InitialCreation() {
 	Play::CreateManager(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE);
 	Play::LoadBackground("Data\\Backgrounds\\background.png");
@@ -158,6 +179,7 @@ void InitialCreation() {
 	CreateChests();
 }
 
+//When space bar pressed and the game is started
 void GameStart()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
@@ -172,29 +194,36 @@ void GameStart()
 	if (Play::KeyPressed(VK_SPACE))
 	{
 		currentLevelState = levelState::STATE_PLAY;
+		//Could cause issues?
 		currentBallState = ballState::STATE_BALL_DROP;
 	}
 
 }
-void GamePlay() {
+
+void GamePlay() 
+{
 	HandlePlayerControls();
 	HandleBall();
 
-	boolean collision = ballCollision();
+	boolean BCollision = ballCollision();
 
 	//If the paddle hits the spanner, bounce back up
-	if (collision) {
+	if (BCollision) {
 		ballBounce();
 	}
 
-	chestCollision();
+	boolean CCollision = chestCollision();
 
-	if (isColliding) {
+	if (CCollision) {
 		ballBounce();
 	}
 
 }
-void GamePause() {
+
+//While the game is paused
+//If space is pressed return to play
+void GamePause() 
+{
 
 	if (Play::KeyPressed(VK_SPACE))
 	{
@@ -202,12 +231,14 @@ void GamePause() {
 	}
 }
 
-void CreateHud() {
+void CreateHud() 
+{
 	//Add Score and Life Counter
 	Play::DrawFontText("64px", "Lives: " + std::to_string(game.lives), Point2D(display.LIVES_POS_X, display.LIVES_POS_Y), Play::CENTRE);
 	Play::DrawFontText("64px", "Score: " + std::to_string(game.score), Point2D(display.SCORE_POS_X, display.SCORE_POS_Y), Play::CENTRE);
 }
 
+//Need to review here for animation frames
 void HandlePlayerControls()
 {
 	GameObject& agent{ Play::GetGameObjectByType(TYPE_AGENT) };
@@ -233,29 +264,35 @@ void HandlePlayerControls()
 		agent.velocity.x = 0.0f;
 	}
 
+	//Is space pressed switch to pause
 	if (Play::KeyPressed(VK_SPACE))
 	{
 		currentLevelState = levelState::STATE_PAUSE;
 	}
 }
 
+
 void HandleBall()
 {
-
+	//Switch that handles current ball state
 	switch (currentBallState)
 	{
+
+	//When dropping should have a higher velocity and acceleration
 	case ballState::STATE_BALL_DROP:
 		ballDown();
 		break;
 
-
+	
+	//Could I do with another state here? or a rename? 
 	case ballState::STATE_BALL_PLAY:
 		ballBounce();
 		break;
 	}
 
+	//Checks if out of bounds 
 	boolean outOfBounds = outOfBoundsChecker();
-
+	//If out of bounds start lose condition
 	if (outOfBounds)
 	{
 		loseCondition();
@@ -268,10 +305,11 @@ void ballDown() {
 
 }
 
+//Fix with new code (Maths slides)
 void ballBounce() {
 	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
 
-	// Set the ball's velocity to move upward (you can adjust the value as needed)
+	// Set the ball's velocity to move upward 
 	ball.velocity.y = -5.0f;
 
 	// Update the ball's position based on the new velocity
@@ -307,26 +345,29 @@ boolean ballCollision()
 		yCollision = false;
 	}
 
-	if (yCollision && xCollision) {
+	if (yCollision && xCollision) 
+	{
 		currentBallState = ballState::STATE_BALL_PLAY;
 		return true;
 	}
-	else {
+	else 
+	{
 		return false;
 	}
 
 }
 
-void chestCollision()
+boolean chestCollision()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
+	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
 
 	boolean xCollision = false;
 	boolean yCollision = false;
 
-	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
 
-	for (int i : chestIds) {
+	for (int i : chestIds) 
+	{
 		GameObject& chest = Play::GetGameObject(i);
 		if (chest.pos.y + chestObj.CHEST_AABB.y > ball.pos.y - ballObj.BALL_AABB.y
 			&& chest.pos.y - chestObj.CHEST_AABB.y < ball.pos.y + ballObj.BALL_AABB.y)
@@ -348,22 +389,17 @@ void chestCollision()
 		}
 
 		if (yCollision && xCollision) {
-
-			isColliding = true;
 			game.score += chestObj.CHEST_VALUE;
 			Play::DestroyGameObject(i);
-
-
-			break;
-
+			return true;
 		}
 		else {
-			isColliding = false;
+			return false;
 		}
 	}
-
 }
 
+//Check if ball has left bottom of screen.
 boolean outOfBoundsChecker()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
@@ -378,13 +414,16 @@ boolean outOfBoundsChecker()
 	}
 }
 
+//If ball falls out of bounds
 void loseCondition()
 {
 
+	//If no lives switch to GameOver
 	if (game.lives == 0)
 	{
 		currentLevelState = levelState::STATE_GAMEOVER;
 	}
+	//Decrement Lives, switch game back to starting state.
 	else
 	{
 		game.lives--;
@@ -394,6 +433,8 @@ void loseCondition()
 
 }
 
+//If Space pressed on Gameover screen
+//Reset the game
 void GameOver()
 {
 	if (Play::KeyPressed(VK_SPACE))

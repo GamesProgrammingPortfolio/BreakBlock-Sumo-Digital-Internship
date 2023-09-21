@@ -9,7 +9,7 @@ void HandleBall();
 void ballDown();
 void ballBounce();
 boolean ballCollision();
-void chestCollision();
+boolean chestCollision();
 void loseCondition();
 boolean outOfBoundsChecker();
 
