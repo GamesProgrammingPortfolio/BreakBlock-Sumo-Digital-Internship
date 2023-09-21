@@ -218,6 +218,15 @@ void GamePlay()
 		ballBounce();
 	}
 
+	GameObject& player{ Play::GetGameObjectByType(TYPE_AGENT) };
+	if (currentPlayerState == playerState::STATE_PLAYER_CLIMB)
+	{
+		Play::SetSprite(player, "agent8_climb", 0.25f);
+	}
+	else if (currentPlayerState == playerState::STATE_PLAYER_HALT)
+	{
+		Play::SetSprite(player, "agent8_halt", 0.333f);
+	}
 }
 
 //While the game is paused
@@ -243,6 +252,7 @@ void HandlePlayerControls()
 	GameObject& agent{ Play::GetGameObjectByType(TYPE_AGENT) };
 	agent.acceleration = Vector2D(0.0f, 0.f);
 	float accelerationIncrease = 0.5f;
+	float deceleration = 0.2f;  // Adjust the deceleration rate as needed
 
 	if (Play::KeyDown(VK_LEFT))
 	{
@@ -253,8 +263,32 @@ void HandlePlayerControls()
 	{
 		agent.acceleration.x += accelerationIncrease;
 	}
+
+	// Apply deceleration when no movement keys are pressed
+	if (!Play::KeyDown(VK_LEFT) && !Play::KeyDown(VK_RIGHT))
+	{
+		if (agent.velocity.x > 0)
+		{
+			agent.acceleration.x = -deceleration;
+		}
+		else if (agent.velocity.x < 0)
+		{
+			agent.acceleration.x = deceleration;
+		}
+	}
+
 	agent.velocity += agent.acceleration;
 	agent.pos += agent.velocity;
+
+	// Update animation state
+	if (Play::KeyDown(VK_LEFT) || Play::KeyDown(VK_RIGHT))
+	{
+		currentPlayerState = playerState::STATE_PLAYER_CLIMB;
+	}
+	else
+	{
+		currentPlayerState = playerState::STATE_PLAYER_HALT;
+	}
 
 	if (agent.pos.x < 0 || agent.pos.x > DISPLAY_WIDTH)
 	{
@@ -269,7 +303,6 @@ void HandlePlayerControls()
 		currentLevelState = levelState::STATE_PAUSE;
 	}
 }
-
 
 void HandleBall()
 {

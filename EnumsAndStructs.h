@@ -86,6 +86,15 @@ enum class ballState
 
 ballState currentBallState = ballState::STATE_BALL_DROP;
 
+enum class playerState
+{
+	STATE_PLAYER_NULL = -1,
+	STATE_PLAYER_HALT,
+	STATE_PLAYER_CLIMB
+};
+
+playerState currentPlayerState = playerState::STATE_PLAYER_HALT;
+
 struct GameState
 {
 	int lives{ MAX_LIVES };
