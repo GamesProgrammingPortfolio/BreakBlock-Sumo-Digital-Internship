@@ -393,19 +393,17 @@ boolean ballCollision()
 	}
 
 }
-
 boolean chestCollision()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
 	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
 
-	boolean xCollision = false;
-	boolean yCollision = false;
-
-
-	for (int i : chestIds) 
+	for (int i : chestIds)
 	{
 		GameObject& chest = Play::GetGameObject(i);
+		boolean xCollision = false;
+		boolean yCollision = false;
+
 		if (chest.pos.y + chestObj.CHEST_AABB.y > ball.pos.y - ballObj.BALL_AABB.y
 			&& chest.pos.y - chestObj.CHEST_AABB.y < ball.pos.y + ballObj.BALL_AABB.y)
 		{
@@ -430,11 +428,12 @@ boolean chestCollision()
 			Play::DestroyGameObject(i);
 			return true;
 		}
-		else {
-			return false;
-		}
 	}
+
+	// Return false only if none of the chests collide
+	return false;
 }
+
 
 //Check if ball has left bottom of screen.
 boolean outOfBoundsChecker()
