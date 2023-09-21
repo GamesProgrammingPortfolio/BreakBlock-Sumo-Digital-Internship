@@ -89,7 +89,6 @@ void Draw()
 		Play::DrawFontText("64px", "Hit Space To Restart", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 150), Play::CENTRE);
 
 	}
-
 	Play::PresentDrawingBuffer();
 }
 
@@ -127,7 +126,9 @@ void DrawObjects() {
 
 	//Drawing Objects that only have one instance
 	Play::DrawObject(Play::GetGameObjectByType(TYPE_AGENT));
-	Play::DrawObject(Play::GetGameObjectByType(TYPE_BALL));
+	
+	//Allows ball to rotate during gameplay
+	Play::DrawObjectRotated(Play::GetGameObjectByType(TYPE_BALL));
 
 	//AABB Box for Player
 	GameObject& agent{ Play::GetGameObjectByType(TYPE_AGENT) };
@@ -197,7 +198,6 @@ void GameStart()
 		//Could cause issues?
 		currentBallState = ballState::STATE_BALL_DROP;
 	}
-
 }
 
 void GamePlay() 
@@ -224,7 +224,6 @@ void GamePlay()
 //If space is pressed return to play
 void GamePause() 
 {
-
 	if (Play::KeyPressed(VK_SPACE))
 	{
 		currentLevelState = levelState::STATE_PLAY;
@@ -302,6 +301,8 @@ void HandleBall()
 void ballDown() {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
 	ball.pos += ballObj.BALL_DROP_VELOCITY;
+	//Not sure if working
+	ball.rotation += 0.05;
 
 }
 
@@ -314,6 +315,9 @@ void ballBounce() {
 
 	// Update the ball's position based on the new velocity
 	ball.pos += ball.velocity;
+	
+	ball.rotation += 0.05;
+
 }
 
 boolean ballCollision()
