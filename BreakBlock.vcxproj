@@ -196,9 +196,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Declarations.h" />
-    <ClInclude Include="DisplayConsts.h" />
-    <ClInclude Include="EnumsAndStructs.h" />
     <ClInclude Include="Play.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

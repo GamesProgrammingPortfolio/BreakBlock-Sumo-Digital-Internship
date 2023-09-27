@@ -1,20 +1,12 @@
 //Declarations
 void Draw();
 void DrawObjects();
-void CreateChests();
-void CreateHud();
 void InitialCreation();
 void HandlePlayerControls();
 void HandleBall();
 void ballDown();
 void ballBounce();
+void ballBounceChest();
 boolean ballCollision();
-boolean chestCollision();
-void loseCondition();
 boolean outOfBoundsChecker();
-
-//GameState Declarations
-void GameStart();
-void GamePlay();
-void GamePause();
-void GameOver();
+void SideAndTopBounce();
