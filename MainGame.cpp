@@ -25,6 +25,12 @@ bool MainGameUpdate(float elapsedTime)
 		BallBounce();
 	}
 
+	boolean CCollision = ChestCollision();
+
+	if (CCollision) {
+		BallBounce();
+	}
+
 	Draw();
 
 	return Play::KeyDown(VK_ESCAPE);
@@ -63,7 +69,42 @@ void DrawObjects()
 	Play::DrawRect(paddleObj.pos - playerObj.PLAYER_AABB, paddleObj.pos + playerObj.PLAYER_AABB, Play::cWhite);
 
 	Play::DrawObjectRotated(Play::GetGameObjectByType(TYPE_BALL));
+
+	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
+
+	//Iterate over every chest ID
+	//Get the chest ID and draw the chest
+	for (int i : chestIds)
+	{
+		GameObject& chest = Play::GetGameObject(i);
+		Play::DrawObject(chest);
+
+		//Rectangle for testing collision
+		Play::DrawRect(chest.pos - chestObj.CHEST_AABB, chest.pos + chestObj.CHEST_AABB, Play::cWhite);
+	}
 }
+
+void CreateChests()
+{
+	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
+
+	//While there is less than 24, draw a chest and a coin 
+	//Coin is currently drawn onto for testing but eventually will need to be swapped so is hidden.
+	for (int i = 1; i <= 24; i++) {
+		Play::CreateGameObject(TYPE_CHEST, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, 10, "box");
+
+		//Add the width and spacing, so next chest is drawn next to previous
+		chestObj.chestSpacing += 105;
+
+		//If there is no remainder then the max amount of chests for that row has been reached
+		//Start a new line 
+		if (i % CHESTS_PER_ROW == 0 && !(i == 0)) {
+			chestObj.chestHeight += 110;
+			chestObj.chestSpacing = chestObj.CHEST_START_X;
+		}
+	}
+}
+
 
 void DrawHud()
 {
@@ -135,6 +176,48 @@ boolean BallCollision()
 		return false;
 	}
 
+}
+
+boolean ChestCollision()
+{
+	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
+	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
+
+	for (int i : chestIds)
+	{
+		GameObject& chest = Play::GetGameObject(i);
+		boolean xCollision = false;
+		boolean yCollision = false;
+
+		if (chest.pos.y + chestObj.CHEST_AABB.y > ball.pos.y - ballObj.BALL_AABB.y
+			&& chest.pos.y - chestObj.CHEST_AABB.y < ball.pos.y + ballObj.BALL_AABB.y)
+		{
+			if (chest.pos.x + chestObj.CHEST_AABB.x > ball.pos.x - ballObj.BALL_AABB.x
+				&& chest.pos.x - chestObj.CHEST_AABB.x < ball.pos.x + ballObj.BALL_AABB.x)
+			{
+				xCollision = true;
+			}
+			else
+			{
+				xCollision = false;
+			}
+			yCollision = true;
+		}
+		else
+		{
+			yCollision = false;
+		}
+
+		if (yCollision && xCollision) {
+
+			game.score += chestObj.CHEST_VALUE;
+			Play::DestroyGameObject(i);
+			return true;
+		}
+	}
+
+	// Return false only if none of the chests collide
+	return false;
 }
 
 void BallBounce()
@@ -209,7 +292,8 @@ void InitialCreation()
 	Play::CentreAllSpriteOrigins(); // this function makes it so that obj.pos values represent the center of a sprite instead of its top-left corner
 	Play::CreateGameObject(TYPE_AGENT, { playerObj.PLAYER_STARTING_X, playerObj.PLAYER_STARTING_Y }, BALL_RADIUS, "agent");
 	Play::CreateGameObject(TYPE_BALL, { ballObj.BALL_STARTING_X, ballObj.BALL_STARTING_X}, BALL_RADIUS, "ball");
-	Play::CentreAllSpriteOrigins();
+	
+	CreateChests();
 }
 
 void getStartingValues() {

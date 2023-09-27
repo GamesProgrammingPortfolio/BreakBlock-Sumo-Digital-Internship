@@ -6,11 +6,13 @@ constexpr int DISPLAY_SCALE{ 1 };
 constexpr int BALL_RADIUS{ 48 };
 constexpr int SCREEN_START_HEIGHT{ 0 };
 constexpr float WEB_HEIGHT{ 550 };
+constexpr int CHESTS_PER_ROW{ 12 };
 
 enum GameObjectType
 {
 	TYPE_BALL = 0,
-	TYPE_AGENT = 1
+	TYPE_AGENT, 
+	TYPE_CHEST
 };
 
 struct HUD
@@ -50,12 +52,26 @@ struct Ball
 };
 Ball ballObj;
 
+struct Chest
+{
+	const int CHEST_START_X{ 60 };
+	const int CHEST_START_Y{ 60 };
+	int chestSpacing{ 58 };
+	int chestHeight{ 0 };
+	int chestCounter{ 0 };
+	bool chestCreated{ false };
+	const Vector2D CHEST_AABB{ 50.f, 50.f };
+	const int CHEST_VALUE{ 50 };
+};
+Chest chestObj;
+
 // Forward-declaration of Draw
 void Draw();
 void DrawHud();
 void DrawObjects();
 void SidesAndTop();
 boolean BallCollision();
+boolean ChestCollision();
 void BallBounce();
 void HandlePlayerControls();
 void getStartingValues();
