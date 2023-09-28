@@ -4,6 +4,8 @@
 #include "Header.h"
 
 int score = 0;
+const float BOUNCE_LEFT{ -2.0f };
+const float BOUNCE_RIGHT{ 2.0f };
 
 //MAIN FUNCTIONS
 void MainGameEntry(PLAY_IGNORE_COMMAND_LINE)
@@ -257,19 +259,15 @@ boolean ChestCollision()
 void BallBounce()
 {
 	GameObject& ballObj = Play::GetGameObjectByType(TYPE_BALL);
+	float horizontalDirection = BOUNCE_RIGHT; 
 
-	// Calculate the horizontal direction of the bounce
-	float horizontalDirection = 2.0f; // Default direction is to the right
-
-	// If the ball is to the left of the paddle's center, set the direction to the left
 	if (ballObj.pos.x < Play::GetGameObjectByType(TYPE_AGENT).pos.x)
 	{
-		horizontalDirection = -2.0f;
+		horizontalDirection = BOUNCE_LEFT;
 	}
 
-	// Set the ball's velocity to move upward and slightly horizontally
-	ballObj.velocity.y = -10.0f; // Adjust the vertical velocity as needed
-	ballObj.velocity.x = horizontalDirection * 2.0f; // Adjust the horizontal velocity as needed
+	ballObj.velocity.y = -10.0f; 
+	ballObj.velocity.x = horizontalDirection * 3.0f; // Adjust the horizontal velocity as needed
 
 	// Update the ball's position based on the new velocity
 	ballObj.pos += ballObj.velocity;
