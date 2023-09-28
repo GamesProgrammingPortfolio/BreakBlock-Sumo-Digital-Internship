@@ -246,7 +246,6 @@ boolean ChestCollision()
 
 			game.score += chestObj.CHEST_VALUE;
 			Play::DestroyGameObject(i);
-			CoinDrop(i);
 			return true;
 		}
 	}
@@ -259,8 +258,18 @@ void BallBounce()
 {
 	GameObject& ballObj = Play::GetGameObjectByType(TYPE_BALL);
 
-	// Set the ball's velocity to move upward (you can adjust the value as needed)
-	ballObj.velocity.y = -10.0f;
+	// Calculate the horizontal direction of the bounce
+	float horizontalDirection = 2.0f; // Default direction is to the right
+
+	// If the ball is to the left of the paddle's center, set the direction to the left
+	if (ballObj.pos.x < Play::GetGameObjectByType(TYPE_AGENT).pos.x)
+	{
+		horizontalDirection = -2.0f;
+	}
+
+	// Set the ball's velocity to move upward and slightly horizontally
+	ballObj.velocity.y = -10.0f; // Adjust the vertical velocity as needed
+	ballObj.velocity.x = horizontalDirection * 2.0f; // Adjust the horizontal velocity as needed
 
 	// Update the ball's position based on the new velocity
 	ballObj.pos += ballObj.velocity;
@@ -352,21 +361,6 @@ void getStartingValues() {
 	ball.acceleration = Vector2D(0.f, 0.55f);
 }
 
-void CoinDrop(int coinId)
-{
-	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
-	GameObject& coin = Play::GetGameObject(coinId);
-	for (int coinId : coinIds)
-	{
-		coin.velocity.y = 10.0f;
-		coin.pos += coin.velocity;
-
-		//if (coin.pos.y > DISPLAY_HEIGHT)
-		//{
-			//Play::DestroyGameObject(coinId);
-		//}
-	}
-}
 
 void GameStart()
 {
