@@ -28,7 +28,7 @@ bool MainGameUpdate(float elapsedTime)
 	boolean CCollision = ChestCollision();
 
 	if (CCollision) {
-		BallBounce();
+		BallChangeDirection();
 	}
 
 	Draw();
@@ -45,8 +45,6 @@ int MainGameExit(void)
 
 
 //DRAW FUNCTIONS
-
-
 // Our draw function. Called by MainGameUpdate to render each frame. 
 void Draw()
 {
@@ -64,13 +62,23 @@ void DrawObjects()
 {
 	Play::DrawLine({ 0, WEB_HEIGHT }, { DISPLAY_WIDTH, WEB_HEIGHT }, Play::cWhite);
 	Play::DrawObject(Play::GetGameObjectByType(TYPE_AGENT));
-	// Draw the AABB box for our paddle
-	GameObject& paddleObj{ Play::GetGameObjectByType(TYPE_AGENT) };
-	Play::DrawRect(paddleObj.pos - playerObj.PLAYER_AABB, paddleObj.pos + playerObj.PLAYER_AABB, Play::cWhite);
 
 	Play::DrawObjectRotated(Play::GetGameObjectByType(TYPE_BALL));
 
 	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
+
+	//Fetching all the coins and assigning them to ID's
+	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
+
+	//Iterate over every coin ID
+	for (int j : coinIds)
+	{
+		GameObject& coin = Play::GetGameObject(j);
+		Play::DrawObject(coin);
+
+		//Rectanggle for testing collision
+		//Play::DrawRect(coin.pos - coinObj.COIN_AABB, coin.pos + coinObj.COIN_AABB, Play::cWhite);
+	}
 
 	//Iterate over every chest ID
 	//Get the chest ID and draw the chest
@@ -82,17 +90,19 @@ void DrawObjects()
 		//Rectangle for testing collision
 		Play::DrawRect(chest.pos - chestObj.CHEST_AABB, chest.pos + chestObj.CHEST_AABB, Play::cWhite);
 	}
+
 }
 
 void CreateChests()
 {
 	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
+	std::vector<int> coinIds = Play::CollectGameObjectIDsByType(TYPE_COIN);
 
 	//While there is less than 24, draw a chest and a coin 
 	//Coin is currently drawn onto for testing but eventually will need to be swapped so is hidden.
 	for (int i = 1; i <= 24; i++) {
 		Play::CreateGameObject(TYPE_CHEST, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, 10, "box");
-
+		Play::CreateGameObject(TYPE_COIN, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, coinObj.COIN_RADIUS, "coin");
 		//Add the width and spacing, so next chest is drawn next to previous
 		chestObj.chestSpacing += 105;
 
@@ -230,6 +240,12 @@ void BallBounce()
 	// Update the ball's position based on the new velocity
 	ballObj.pos += ballObj.velocity;
 
+}
+
+void BallChangeDirection()
+{
+	GameObject& ballObj = Play::GetGameObjectByType(TYPE_BALL);
+	ballObj.velocity.y *= -1;
 }
 
 //PLAYER CONTROL

@@ -12,7 +12,8 @@ enum GameObjectType
 {
 	TYPE_BALL = 0,
 	TYPE_AGENT, 
-	TYPE_CHEST
+	TYPE_CHEST,
+	TYPE_COIN
 };
 
 struct HUD
@@ -65,6 +66,18 @@ struct Chest
 };
 Chest chestObj;
 
+struct Coin
+{
+	const float COIN_STARTING_X{ DISPLAY_WIDTH / 2 };
+	const float COIN_STARTING_Y{ DISPLAY_HEIGHT / 2 };
+	const Vector2D COIN_AABB{ 35.f, 35.f };
+	const Vector2D pos{ 0,0 };
+	const Vector2D COIN_DROP_VELOCITY{ 1, 12 };
+	const int COIN_SCORE_VALUE{ 200 };
+	const int COIN_RADIUS{ 48 };
+};
+Coin coinObj;
+
 // Forward-declaration of Draw
 void Draw();
 void DrawHud();
@@ -76,3 +89,4 @@ void BallBounce();
 void HandlePlayerControls();
 void getStartingValues();
 void InitialCreation();
+void BallChangeDirection();
