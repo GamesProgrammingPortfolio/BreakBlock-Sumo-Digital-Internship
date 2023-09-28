@@ -34,22 +34,6 @@ bool MainGameUpdate(float elapsedTime)
 		break;
 	}
 
-	HandlePlayerControls();
-	SidesAndTop();
-
-	boolean collision = BallCollision();
-
-	//If the paddle hits the spanner, bounce back up
-	if (collision) {
-		BallBounce();
-	}
-
-	boolean CCollision = ChestCollision();
-
-	if (CCollision) {
-		BallChangeDirection();
-	}
-
 	Draw();
 
 	return Play::KeyDown(VK_ESCAPE);
@@ -386,12 +370,29 @@ void CoinDrop(int coinId)
 
 void GameStart()
 {
-
+	if (Play::KeyPressed(VK_SPACE))
+	{
+		currentLevelState = levelState::STATE_PLAY;
+	}
 }
 
 void GamePlay()
 {
+	HandlePlayerControls();
+	SidesAndTop();
 
+	boolean collision = BallCollision();
+
+	//If the paddle hits the spanner, bounce back up
+	if (collision) {
+		BallBounce();
+	}
+
+	boolean CCollision = ChestCollision();
+
+	if (CCollision) {
+		BallChangeDirection();
+	}
 }
 
 void GamePause()
