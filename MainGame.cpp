@@ -15,6 +15,25 @@ void MainGameEntry(PLAY_IGNORE_COMMAND_LINE)
 // Called by PlayBuffer every frame (60 times a second!)
 bool MainGameUpdate(float elapsedTime)
 {
+	switch (currentLevelState)
+	{
+	case levelState::STATE_START:
+		GameStart();
+		break;
+
+	case levelState::STATE_PLAY:
+		GamePlay();
+		break;
+
+	case levelState::STATE_GAMEOVER:
+		GameOver();
+		break;
+
+	case levelState::STATE_PAUSE:
+		GamePause();
+		break;
+	}
+
 	HandlePlayerControls();
 	SidesAndTop();
 
@@ -52,9 +71,32 @@ void Draw()
 	Play::ClearDrawingBuffer(Play::cWhite);
 	Play::DrawBackground();
 
-	DrawObjects();
-	DrawHud();
+	if (currentLevelState == levelState::STATE_START || currentLevelState == levelState::STATE_PLAY)
+	{
+		DrawObjects();
+		DrawHud();
+	}
+	//Draw additional start game text
+	if (currentLevelState == levelState::STATE_START)
+	{
+		Play::DrawFontText("64px", "Hit Space to Start", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
+	}
 
+	//Draw Pause Text
+	if (currentLevelState == levelState::STATE_PAUSE)
+	{
+		Play::DrawFontText("64px", "PAUSE!", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
+		Play::DrawFontText("64px", "Hit Space to Resume", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
+	}
+
+	//If Ball Out of Bounds
+	if (currentLevelState == levelState::STATE_GAMEOVER)
+	{
+		Play::DrawFontText("64px", "Game Over!", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
+		Play::DrawFontText("64px", "Final Score: " + std::to_string(game.score), Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
+		Play::DrawFontText("64px", "Hit Space To Restart", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 150), Play::CENTRE);
+
+	}
 	Play::PresentDrawingBuffer();
 }
 
@@ -76,7 +118,7 @@ void DrawObjects()
 		GameObject& coin = Play::GetGameObject(j);
 		Play::DrawObject(coin);
 
-		//Rectanggle for testing collision
+		//Rectangle for testing collision
 		//Play::DrawRect(coin.pos - coinObj.COIN_AABB, coin.pos + coinObj.COIN_AABB, Play::cWhite);
 	}
 
@@ -87,8 +129,6 @@ void DrawObjects()
 		GameObject& chest = Play::GetGameObject(i);
 		Play::DrawObject(chest);
 
-		//Rectangle for testing collision
-		Play::DrawRect(chest.pos - chestObj.CHEST_AABB, chest.pos + chestObj.CHEST_AABB, Play::cWhite);
 	}
 
 }
@@ -222,6 +262,7 @@ boolean ChestCollision()
 
 			game.score += chestObj.CHEST_VALUE;
 			Play::DestroyGameObject(i);
+			CoinDrop(i);
 			return true;
 		}
 	}
@@ -296,6 +337,11 @@ void HandlePlayerControls()
 		//Stops the player object when at edge of screen
 		agent.velocity.x = 0.0f;
 	}
+
+	if (Play::KeyPressed(VK_SPACE))
+	{
+		currentLevelState = levelState::STATE_PAUSE;
+	}
 }
 
 
@@ -320,4 +366,43 @@ void getStartingValues() {
 	
 
 	ball.acceleration = Vector2D(0.f, 0.55f);
+}
+
+void CoinDrop(int coinId)
+{
+	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
+	GameObject& coin = Play::GetGameObject(coinId);
+	for (int coinId : coinIds)
+	{
+		coin.velocity.y = 10.0f;
+		coin.pos += coin.velocity;
+
+		//if (coin.pos.y > DISPLAY_HEIGHT)
+		//{
+			//Play::DestroyGameObject(coinId);
+		//}
+	}
+}
+
+void GameStart()
+{
+
+}
+
+void GamePlay()
+{
+
+}
+
+void GamePause()
+{
+	if (Play::KeyPressed(VK_SPACE))
+	{
+		currentLevelState = levelState::STATE_PLAY;
+	}
+}
+
+void GameOver()
+{
+
 }

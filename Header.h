@@ -78,6 +78,16 @@ struct Coin
 };
 Coin coinObj;
 
+enum class levelState
+{
+	STATE_NULL = -1,
+	STATE_START,
+	STATE_PLAY,
+	STATE_GAMEOVER,
+	STATE_PAUSE
+};
+levelState currentLevelState = levelState::STATE_START;
+
 // Forward-declaration of Draw
 void Draw();
 void DrawHud();
@@ -90,3 +100,9 @@ void HandlePlayerControls();
 void getStartingValues();
 void InitialCreation();
 void BallChangeDirection();
+void CoinDrop(int);
+
+void GameStart();
+void GamePlay();
+void GameOver();
+void GamePause();
