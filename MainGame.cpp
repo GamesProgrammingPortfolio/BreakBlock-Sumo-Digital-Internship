@@ -247,10 +247,7 @@ boolean ChestCollision()
 
 			int coinId = Play::CreateGameObject(TYPE_COIN, chest.pos, coinObj.COIN_RADIUS, "coin");
 			coinIds.push_back(coinId);
-
-
 			Play::DestroyGameObject(i);
-
 			return true;
 		}
 	}
@@ -374,6 +371,7 @@ void GamePlay()
 {
 	HandlePlayerControls();
 	SidesAndTop();
+	CoinMovement();
 
 	boolean collision = BallCollision();
 
@@ -399,5 +397,22 @@ void GamePause()
 
 void GameOver()
 {
+
+}
+
+void CoinMovement()
+{
+	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
+	for (int coinId : coinIds) {
+		GameObject& coin = Play::GetGameObject(coinId);
+
+		// Move the coin down the screen
+		coin.pos.y += coinObj.COIN_SPEED; // Adjust the speed as needed
+
+		// Remove off-screen coins
+		if (coin.pos.y > DISPLAY_HEIGHT + 25) {
+			Play::DestroyGameObject(coinId);
+		}
+	}
 
 }

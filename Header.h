@@ -77,6 +77,7 @@ struct Coin
 	const int COIN_VALUE{ 200 };
 	const int COIN_RADIUS{ 48 };
 	int coinIndex{ 0 };
+	const float COIN_SPEED{ 4.0f };
 };
 Coin coinObj;
 
@@ -102,7 +103,7 @@ void HandlePlayerControls();
 void getStartingValues();
 void InitialCreation();
 void BallChangeDirection();
-void coinMovement(int);
+void CoinMovement();
 
 void GameStart();
 void GamePlay();
