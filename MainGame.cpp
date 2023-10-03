@@ -6,6 +6,7 @@
 int score = 0;
 const float BOUNCE_LEFT{ -2.0f };
 const float BOUNCE_RIGHT{ 2.0f };
+const int MAX_LIVES{ 3 };
 
 //MAIN FUNCTIONS
 void MainGameEntry(PLAY_IGNORE_COMMAND_LINE)
@@ -120,8 +121,8 @@ void DrawObjects()
 
 void CreateChests()
 {
+	chestObj.chestHeight = 0;
 	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
-
 	//While there is less than 24, draw a chest and a coin 
 	for (int i = 1; i <= 24; i++) {
 		Play::CreateGameObject(TYPE_CHEST, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, 10, "box");
@@ -385,6 +386,15 @@ void GamePlay()
 	if (CCollision) {
 		BallChangeDirection();
 	}
+
+	//Checks if out of bounds 
+	boolean outOfBounds = OutOfBoundsChecker();
+	//If out of bounds start lose condition
+	if (outOfBounds)
+	{
+		LoseCondition();
+	}
+	
 }
 
 void GamePause()
@@ -395,9 +405,29 @@ void GamePause()
 	}
 }
 
+void LoseCondition()
+{
+	//If no lives switch to GameOver
+	if (game.lives == 0)
+	{
+		currentLevelState = levelState::STATE_GAMEOVER;
+	}
+	//Decrement Lives, switch game back to starting state.
+	else
+	{
+		game.lives--;
+		ResetBallPosition();
+		currentLevelState = levelState::STATE_START;
+	}
+}
+
 void GameOver()
 {
-
+	if (Play::KeyPressed(VK_SPACE))
+	{
+		ResetGame();
+		currentLevelState = levelState::STATE_START;
+	}
 }
 
 void CoinMovement()
@@ -415,4 +445,50 @@ void CoinMovement()
 		}
 	}
 
+}
+
+boolean OutOfBoundsChecker()
+{
+	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
+
+	if (ball.pos.y > DISPLAY_HEIGHT)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void ResetBallPosition() {
+	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
+	ball.pos.x = ballObj.BALL_STARTING_X;
+	ball.pos.y = ballObj.BALL_STARTING_Y;
+
+	GameObject& player = Play::GetGameObjectByType(TYPE_AGENT);
+	player.pos.x = playerObj.PLAYER_STARTING_X;
+	player.pos.y = playerObj.PLAYER_STARTING_Y;
+}
+
+void ResetGame() {
+	game.lives = MAX_LIVES;
+	game.score = 0;
+
+	// Reset the ball's position
+	ResetBallPosition();
+
+	// Remove all existing coins
+	std::vector<int> coinIds = Play::CollectGameObjectIDsByType(TYPE_COIN);
+	for (int coinId : coinIds) {
+		Play::DestroyGameObject(coinId);
+	}
+
+	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
+	for (int chestId : chestIds) {
+		Play::DestroyGameObject(chestId);
+	}
+
+	// Recreate chests and coins
+	CreateChests();
 }

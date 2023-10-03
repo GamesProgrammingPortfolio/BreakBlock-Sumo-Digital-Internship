@@ -104,6 +104,10 @@ void getStartingValues();
 void InitialCreation();
 void BallChangeDirection();
 void CoinMovement();
+void LoseCondition();
+boolean OutOfBoundsChecker();
+void ResetBallPosition();
+void ResetGame();
 
 void GameStart();
 void GamePlay();
