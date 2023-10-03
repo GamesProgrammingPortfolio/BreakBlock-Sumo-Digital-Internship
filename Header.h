@@ -74,10 +74,10 @@ struct Coin
 	const Vector2D COIN_AABB{ 35.f, 35.f };
 	const Vector2D pos{ 0,0 };
 	const Vector2D COIN_DROP_VELOCITY{ 1, 12 };
-	const int COIN_VALUE{ 200 };
 	const int COIN_RADIUS{ 48 };
 	int coinIndex{ 0 };
 	const float COIN_SPEED{ 4.0f };
+	const int COIN_VALUE{ 200 };
 };
 Coin coinObj;
 
@@ -113,3 +113,6 @@ void GameStart();
 void GamePlay();
 void GameOver();
 void GamePause();
+
+boolean CoinCollision();
+void CollectCoin();

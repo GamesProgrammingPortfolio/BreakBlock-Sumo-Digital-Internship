@@ -104,9 +104,6 @@ void DrawObjects()
 	{
 		GameObject& coin = Play::GetGameObject(j);
 		Play::DrawObject(coin);
-
-		//Rectangle for testing collision
-		//Play::DrawRect(coin.pos - coinObj.COIN_AABB, coin.pos + coinObj.COIN_AABB, Play::cWhite);
 	}
 
 	//Iterate over every chest ID
@@ -387,6 +384,13 @@ void GamePlay()
 		BallChangeDirection();
 	}
 
+	boolean coinCollision = CoinCollision();
+
+	if (coinCollision)
+	{
+		CollectCoin();
+	}
+
 	//Checks if out of bounds 
 	boolean outOfBounds = OutOfBoundsChecker();
 	//If out of bounds start lose condition
@@ -461,7 +465,8 @@ boolean OutOfBoundsChecker()
 	}
 }
 
-void ResetBallPosition() {
+void ResetBallPosition() 
+{
 	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
 	ball.pos.x = ballObj.BALL_STARTING_X;
 	ball.pos.y = ballObj.BALL_STARTING_Y;
@@ -471,7 +476,8 @@ void ResetBallPosition() {
 	player.pos.y = playerObj.PLAYER_STARTING_Y;
 }
 
-void ResetGame() {
+void ResetGame() 
+{
 	game.lives = MAX_LIVES;
 	game.score = 0;
 
@@ -491,4 +497,49 @@ void ResetGame() {
 
 	// Recreate chests and coins
 	CreateChests();
+}
+
+boolean CoinCollision()
+{
+	GameObject& player{ Play::GetGameObjectByType(TYPE_AGENT) };
+	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
+
+	for (int i : coinIds)
+	{
+		GameObject& coin = Play::GetGameObject(i);
+		boolean xCollision = false;
+		boolean yCollision = false;
+
+		if (coin.pos.y + coinObj.COIN_AABB.y > player.pos.y - playerObj.PLAYER_AABB.y
+			&& coin.pos.y - coinObj.COIN_AABB.y < player.pos.y + playerObj.PLAYER_AABB.y)
+		{
+			if (coin.pos.x + coinObj.COIN_AABB.x > player.pos.x - playerObj.PLAYER_AABB.x
+				&& coin.pos.x - coinObj.COIN_AABB.x < player.pos.x + playerObj.PLAYER_AABB.x)
+			{
+				xCollision = true;
+			}
+			else
+			{
+				xCollision = false;
+			}
+			yCollision = true;
+		}
+		else
+		{
+			yCollision = false;
+		}
+
+		if (yCollision && xCollision) {
+			Play::DestroyGameObject(i);
+			return true;
+		}
+	}
+
+	// Return false only if none of the chests collide
+	return false;
+}
+
+void CollectCoin()
+{
+	game.score += coinObj.COIN_VALUE;
 }
