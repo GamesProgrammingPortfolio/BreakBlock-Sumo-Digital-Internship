@@ -3,7 +3,6 @@
 #include "Play.h"
 #include "Header.h"
 
-boolean drawCoinIndex{ false };
 int score = 0;
 const float BOUNCE_LEFT{ -2.0f };
 const float BOUNCE_RIGHT{ 2.0f };
@@ -245,8 +244,13 @@ boolean ChestCollision()
 		if (yCollision && xCollision) {
 
 			game.score += chestObj.CHEST_VALUE;
+
+			int coinId = Play::CreateGameObject(TYPE_COIN, chest.pos, coinObj.COIN_RADIUS, "coin");
+			coinIds.push_back(coinId);
+
+
 			Play::DestroyGameObject(i);
-			
+
 			return true;
 		}
 	}
