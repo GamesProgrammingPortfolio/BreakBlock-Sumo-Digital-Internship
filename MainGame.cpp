@@ -3,20 +3,18 @@
 #include "Play.h"
 #include "Header.h"
 
+//Globals
 int score = 0;
 int chestCount = 24;
-const float BOUNCE_LEFT{ -2.0f };
-const float BOUNCE_RIGHT{ 2.0f };
-const int MAX_LIVES{ 3 };
 
-//MAIN FUNCTIONS
+//Game Starting Point
 void MainGameEntry(PLAY_IGNORE_COMMAND_LINE)
 {
 	InitialCreation();
-	getStartingValues();
+	GetStartingValues();
 }
 
-// Called by PlayBuffer every frame (60 times a second!)
+
 bool MainGameUpdate(float elapsedTime)
 {
 	switch (currentLevelState)
@@ -247,7 +245,7 @@ boolean ChestCollision()
 
 			game.score += chestObj.CHEST_VALUE;
 
-			int coinId = Play::CreateGameObject(TYPE_COIN, chest.pos, coinObj.COIN_RADIUS, "coin");
+			int coinId = Play::CreateGameObject(TYPE_COIN, chest.pos, RADIUS, "coin");
 			coinIds.push_back(coinId);
 			Play::DestroyGameObject(i);
 			chestCount--;
@@ -342,13 +340,13 @@ void InitialCreation()
 	Play::CreateManager(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE);
 	Play::LoadBackground("Data\\Backgrounds\\background.png");
 	Play::CentreAllSpriteOrigins(); // this function makes it so that obj.pos values represent the center of a sprite instead of its top-left corner
-	Play::CreateGameObject(TYPE_AGENT, { playerObj.PLAYER_STARTING_X, playerObj.PLAYER_STARTING_Y }, BALL_RADIUS, "agent");
-	Play::CreateGameObject(TYPE_BALL, { ballObj.BALL_STARTING_X, ballObj.BALL_STARTING_X}, BALL_RADIUS, "ball");
+	Play::CreateGameObject(TYPE_AGENT, { playerObj.PLAYER_STARTING_X, playerObj.PLAYER_STARTING_Y }, RADIUS, "agent");
+	Play::CreateGameObject(TYPE_BALL, { ballObj.BALL_STARTING_X, ballObj.BALL_STARTING_X}, RADIUS, "ball");
 	
 	CreateChests();
 }
 
-void getStartingValues() {
+void GetStartingValues() {
 	score = 0;
 	// Set initial velocity for ball
 	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
