@@ -117,7 +117,7 @@ void HandlePlayerControls();
 void BallChangeDirection();
 void CoinMovement();
 void LoseCondition();
-void ResetBallPosition();
+void ResetPositions();
 void ResetGame();
 void ResetGameWin();
 void WinCondition();
