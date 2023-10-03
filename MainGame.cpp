@@ -4,6 +4,7 @@
 #include "Header.h"
 
 int score = 0;
+int chestCount = 24;
 const float BOUNCE_LEFT{ -2.0f };
 const float BOUNCE_RIGHT{ 2.0f };
 const int MAX_LIVES{ 3 };
@@ -40,7 +41,6 @@ bool MainGameUpdate(float elapsedTime)
 		GameWin();
 		break;
 	}
-
 	Draw();
 
 	return Play::KeyDown(VK_ESCAPE);
@@ -52,7 +52,6 @@ int MainGameExit(void)
 	Play::DestroyManager();
 	return PLAY_OK;
 }
-
 
 //DRAW FUNCTIONS
 // Our draw function. Called by MainGameUpdate to render each frame. 
@@ -86,7 +85,6 @@ void Draw()
 		Play::DrawFontText("64px", "Game Over!", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
 		Play::DrawFontText("64px", "Final Score: " + std::to_string(game.score), Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
 		Play::DrawFontText("64px", "Hit Space To Restart", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 150), Play::CENTRE);
-
 	}
 
 	//If No More Chests 
@@ -125,12 +123,12 @@ void DrawObjects()
 		GameObject& chest = Play::GetGameObject(i);
 		Play::DrawObject(chest);
 	}
-
 }
 
 void CreateChests()
 {
 	chestObj.chestHeight = 0;
+	chestCount = 24;
 	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
 	//While there is less than 24, draw a chest and a coin 
 	for (int i = 1; i <= 24; i++) {
@@ -146,7 +144,6 @@ void CreateChests()
 		}
 	}
 }
-
 
 void DrawHud()
 {
@@ -168,7 +165,6 @@ void SidesAndTop()
 		ballObj.velocity += ballObj.acceleration;
 		ballObj.pos += ballObj.velocity;
 	}
-
 	ballObj.pos += ballObj.velocity;
 	ballObj.rotation += 0.05;
 
@@ -176,11 +172,9 @@ void SidesAndTop()
 	{
 		ballObj.velocity.y *= -1;
 	}
-
 }
 
 //Uses AABB on both the ball and the paddle to detect collision
-
 boolean BallCollision()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
@@ -188,7 +182,6 @@ boolean BallCollision()
 
 	boolean xCollision = false;
 	boolean yCollision = false;
-
 
 	if (player.pos.y + playerObj.PLAYER_AABB.y > ball.pos.y - ballObj.BALL_AABB.y
 		&& player.pos.y - playerObj.PLAYER_AABB.y < ball.pos.y + ballObj.BALL_AABB.y)
@@ -217,7 +210,6 @@ boolean BallCollision()
 	{
 		return false;
 	}
-
 }
 
 boolean ChestCollision()
@@ -258,10 +250,10 @@ boolean ChestCollision()
 			int coinId = Play::CreateGameObject(TYPE_COIN, chest.pos, coinObj.COIN_RADIUS, "coin");
 			coinIds.push_back(coinId);
 			Play::DestroyGameObject(i);
+			chestCount--;
 			return true;
 		}
 	}
-
 	// Return false only if none of the chests collide
 	return false;
 }
@@ -281,7 +273,6 @@ void BallBounce()
 
 	// Update the ball's position based on the new velocity
 	ballObj.pos += ballObj.velocity;
-
 }
 
 void BallChangeDirection()
@@ -291,7 +282,6 @@ void BallChangeDirection()
 }
 
 //PLAYER CONTROL
-
 void HandlePlayerControls()
 {
 	GameObject& agent{ Play::GetGameObjectByType(TYPE_AGENT) };
@@ -320,14 +310,15 @@ void HandlePlayerControls()
 			agent.acceleration.x = deceleration;
 		}
 	}
-		if (Play::KeyDown(VK_LEFT) || Play::KeyDown(VK_RIGHT))
-		{
-			Play::SetSprite(agent, "agent8_climb", 0.25f);
-		}
-		else
-		{
-			Play::SetSprite(agent, "agent8_halt", 0.333f);
-		}
+		
+	if (Play::KeyDown(VK_LEFT) || Play::KeyDown(VK_RIGHT))
+	{
+		Play::SetSprite(agent, "agent8_climb", 0.25f);
+	}
+	else
+	{
+		Play::SetSprite(agent, "agent8_halt", 0.333f);
+	}
 
 	agent.velocity += agent.acceleration;
 	agent.pos += agent.velocity;
@@ -345,9 +336,7 @@ void HandlePlayerControls()
 	}
 }
 
-
 //GAME START
-
 void InitialCreation()
 {
 	Play::CreateManager(DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_SCALE);
@@ -361,13 +350,10 @@ void InitialCreation()
 
 void getStartingValues() {
 	score = 0;
-	
 	// Set initial velocity for ball
 	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
-	
 	ball.acceleration = Vector2D(0.f, 0.55f);
 }
-
 
 void GameStart()
 {
@@ -411,6 +397,11 @@ void GamePlay()
 		LoseCondition();
 	}
 	
+	boolean hasThePlayerWon = ChestChecker();
+	if (hasThePlayerWon)
+	{
+		WinCondition();
+	}
 }
 
 void GamePause()
@@ -580,4 +571,19 @@ boolean CoinCollision()
 void CollectCoin()
 {
 	game.score += coinObj.COIN_VALUE;
+}
+
+void WinCondition()
+{
+	currentLevelState = levelState::STATE_WIN;
+}
+
+boolean ChestChecker()
+{
+	if (chestCount == 0) {
+		return true; // All chests are gone
+	}
+	else {
+		return false; // There are still chests left
+	}
 }

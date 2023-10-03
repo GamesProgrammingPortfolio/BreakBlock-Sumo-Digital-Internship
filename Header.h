@@ -110,6 +110,7 @@ boolean OutOfBoundsChecker();
 void ResetBallPosition();
 void ResetGame();
 void ResetGameWin();
+void WinCondition();
 
 void GameStart();
 void GamePlay();
@@ -119,3 +120,4 @@ void GameWin();
 
 boolean CoinCollision();
 void CollectCoin();
+boolean ChestChecker();
