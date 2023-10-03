@@ -63,6 +63,7 @@ struct Chest
 	bool chestCreated{ false };
 	const Vector2D CHEST_AABB{ 50.f, 50.f };
 	const int CHEST_VALUE{ 50 };
+	int chestIndex{ 0 };
 };
 Chest chestObj;
 
@@ -75,6 +76,7 @@ struct Coin
 	const Vector2D COIN_DROP_VELOCITY{ 1, 12 };
 	const int COIN_VALUE{ 200 };
 	const int COIN_RADIUS{ 48 };
+	int coinIndex{ 0 };
 };
 Coin coinObj;
 
@@ -100,6 +102,7 @@ void HandlePlayerControls();
 void getStartingValues();
 void InitialCreation();
 void BallChangeDirection();
+void coinMovement(int);
 
 void GameStart();
 void GamePlay();

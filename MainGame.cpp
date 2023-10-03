@@ -3,6 +3,7 @@
 #include "Play.h"
 #include "Header.h"
 
+boolean drawCoinIndex{ false };
 int score = 0;
 const float BOUNCE_LEFT{ -2.0f };
 const float BOUNCE_RIGHT{ 2.0f };
@@ -114,7 +115,6 @@ void DrawObjects()
 	{
 		GameObject& chest = Play::GetGameObject(i);
 		Play::DrawObject(chest);
-
 	}
 
 }
@@ -122,13 +122,10 @@ void DrawObjects()
 void CreateChests()
 {
 	std::vector<int> chestIds = Play::CollectGameObjectIDsByType(TYPE_CHEST);
-	std::vector<int> coinIds = Play::CollectGameObjectIDsByType(TYPE_COIN);
 
 	//While there is less than 24, draw a chest and a coin 
-	//Coin is currently drawn onto for testing but eventually will need to be swapped so is hidden.
 	for (int i = 1; i <= 24; i++) {
 		Play::CreateGameObject(TYPE_CHEST, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, 10, "box");
-		Play::CreateGameObject(TYPE_COIN, { chestObj.chestSpacing, chestObj.CHEST_START_Y + chestObj.chestHeight }, coinObj.COIN_RADIUS, "coin");
 		//Add the width and spacing, so next chest is drawn next to previous
 		chestObj.chestSpacing += 105;
 
@@ -218,6 +215,7 @@ boolean ChestCollision()
 {
 	GameObject& ball{ Play::GetGameObjectByType(TYPE_BALL) };
 	std::vector<int> chestIds{ Play::CollectGameObjectIDsByType(TYPE_CHEST) };
+	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
 
 	for (int i : chestIds)
 	{
@@ -248,6 +246,7 @@ boolean ChestCollision()
 
 			game.score += chestObj.CHEST_VALUE;
 			Play::DestroyGameObject(i);
+			
 			return true;
 		}
 	}
@@ -355,7 +354,6 @@ void getStartingValues() {
 	// Set initial velocity for ball
 	GameObject& ball = Play::GetGameObjectByType(TYPE_BALL);
 	
-
 	ball.acceleration = Vector2D(0.f, 0.55f);
 }
 
