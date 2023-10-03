@@ -87,7 +87,8 @@ enum class levelState
 	STATE_START,
 	STATE_PLAY,
 	STATE_GAMEOVER,
-	STATE_PAUSE
+	STATE_PAUSE,
+	STATE_WIN
 };
 levelState currentLevelState = levelState::STATE_START;
 
@@ -108,11 +109,13 @@ void LoseCondition();
 boolean OutOfBoundsChecker();
 void ResetBallPosition();
 void ResetGame();
+void ResetGameWin();
 
 void GameStart();
 void GamePlay();
 void GameOver();
 void GamePause();
+void GameWin();
 
 boolean CoinCollision();
 void CollectCoin();

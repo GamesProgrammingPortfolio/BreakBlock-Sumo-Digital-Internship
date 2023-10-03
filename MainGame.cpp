@@ -35,6 +35,10 @@ bool MainGameUpdate(float elapsedTime)
 	case levelState::STATE_PAUSE:
 		GamePause();
 		break;
+
+	case levelState::STATE_WIN:
+		GameWin();
+		break;
 	}
 
 	Draw();
@@ -83,6 +87,14 @@ void Draw()
 		Play::DrawFontText("64px", "Final Score: " + std::to_string(game.score), Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
 		Play::DrawFontText("64px", "Hit Space To Restart", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 150), Play::CENTRE);
 
+	}
+
+	//If No More Chests 
+	if (currentLevelState == levelState::STATE_WIN)
+	{
+		Play::DrawFontText("64px", "You Win! Congratulations", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), Play::CENTRE);
+		Play::DrawFontText("64px", "Current Score: " + std::to_string(game.score), Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 50), Play::CENTRE);
+		Play::DrawFontText("64px", "Hit Space To Continue", Point2D(DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2 + 150), Play::CENTRE);
 	}
 	Play::PresentDrawingBuffer();
 }
@@ -434,6 +446,15 @@ void GameOver()
 	}
 }
 
+void GameWin()
+{
+	if (Play::KeyPressed(VK_SPACE))
+	{
+		ResetGameWin();
+		currentLevelState = levelState::STATE_START;
+	}
+}
+
 void CoinMovement()
 {
 	std::vector<int> coinIds{ Play::CollectGameObjectIDsByType(TYPE_COIN) };
@@ -498,6 +519,23 @@ void ResetGame()
 	// Recreate chests and coins
 	CreateChests();
 }
+
+
+void ResetGameWin()
+{
+	// Reset the ball's position
+	ResetBallPosition();
+
+	// Remove all existing coins
+	std::vector<int> coinIds = Play::CollectGameObjectIDsByType(TYPE_COIN);
+	for (int coinId : coinIds) {
+		Play::DestroyGameObject(coinId);
+	}
+
+	// Recreate chests and coins
+	CreateChests();
+}
+
 
 boolean CoinCollision()
 {
